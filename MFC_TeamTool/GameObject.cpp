@@ -24,9 +24,9 @@ GameObject::~GameObject()
 {
 }
 
-void GameObject::Render()
+void GameObject::Render(float _x, float _y)
 {
-	Texture* tex = TextureManager::GetInstance()->GetTexture(data.texName);
+	Texture* tex = TextureManager::GetInstance()->GetTexture(data.texName.GetString());
 
 	D3DXMATRIX matRot, matScale, matTrans, matWorld;
 	
@@ -35,6 +35,15 @@ void GameObject::Render()
 	D3DXMatrixTranslation(&matTrans, data.position.x, data.position.y, data.position.z);
 	matWorld = matScale * matRot * matTrans;
 
+	matWorld._11 *= _x;
+	matWorld._21 *= _x;
+	matWorld._31 *= _x;
+	matWorld._41 *= _x;
+
+	matWorld._12 *= _y;
+	matWorld._22 *= _y;
+	matWorld._32 *= _y;
+	matWorld._42 *= _y;
 
 	DeviceManager::GetInstance()->GetSprite()->SetTransform(&matWorld);
 	DeviceManager::GetInstance()->GetSprite()->Draw(
@@ -43,4 +52,26 @@ void GameObject::Render()
 		&D3DXVECTOR3((float)(tex->m_tex.info.Width >> 1), (float)(tex->m_tex.info.Height >> 1), 0.f),
 		nullptr,
 		D3DCOLOR_ARGB(255, 255, 255, 255));
+}
+
+ObjectData::ObjectData()
+{
+	position.x = 0;
+	position.y = 0;
+	position.z = 0;
+
+	angle = 0;
+	
+	scale.x = 1;
+	scale.y = 1;
+	scale.z = 1;
+
+	colliderOffset.x = 0;
+	colliderOffset.y = 0;
+
+	colliderScale.x = 1;
+	colliderScale.y = 1;
+
+
+
 }

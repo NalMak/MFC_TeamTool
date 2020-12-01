@@ -50,7 +50,7 @@
 #include "Struct.h"
 #include "Extern.h"
 #include "Enum.h"
-
+#include "MFC_Utility.h"
 using namespace std;
 
 

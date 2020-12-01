@@ -6,6 +6,7 @@
 
 class CMFC_TeamToolDoc;
 class GameObject;
+class MainFormView;
 class CMFC_TeamToolView : public CView
 {
 protected: // serialization에서만 만들어집니다.
@@ -15,7 +16,7 @@ protected: // serialization에서만 만들어집니다.
 // 특성입니다.
 public:
 	CMFC_TeamToolDoc* GetDocument() const;
-
+	MainFormView* m_formView;
 // 작업입니다.
 public:
 
@@ -48,6 +49,7 @@ private:
 	GameObject* m_creatingObject;
 public:
 	GameObject* GetCreatingObject() { return m_creatingObject; }
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // MFC_TeamToolView.cpp의 디버그 버전

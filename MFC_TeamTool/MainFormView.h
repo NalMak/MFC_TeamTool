@@ -37,6 +37,7 @@ private:
 	void InitCollider();
 	void InitTransform();
 	void InitTexture();
+	void UpdateCreatingObjectInfo();
 private:
 	afx_msg void OnSelChangedTree(NMHDR* pNMHDR, LRESULT* pResult);
 
@@ -52,6 +53,8 @@ public:
 	CEdit m_scaleX;
 	CEdit m_scaleY;
 	CEdit m_scaleZ;
+
+
 	afx_msg void OnCbnSelchangeTexture();
 private:
 	CMFC_TeamToolView* m_deviceView;
@@ -62,6 +65,22 @@ public:
 private:
 	list<ObjectData> m_objectDataList;
 
+public:
+	afx_msg void OnBnClickedCreateObject();
+	afx_msg void OnEnChangeSetName();
+	CEdit m_creatingObjectName;
+	afx_msg void OnCbnSelchangeSelectObject();
+	CEdit m_colliderOffsetX;
+	CEdit m_colliderOffsetY;
+	CEdit m_colliderScaleX;
+	CEdit m_colliderScaleY;
+
+private:
+	CListBox m_installedObjectList;
+
+public:
+	void AddInstalledObjectData(ObjectData _data);
+	afx_msg void OnEnChangeEdit1();
 };
 
 

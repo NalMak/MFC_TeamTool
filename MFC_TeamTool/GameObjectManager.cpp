@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "GameObjectManager.h"
 #include "GameObject.h"
-
+#include "MFC_TeamToolView.h"
 GameObjectManager::GameObjectManager()
 {
 }
@@ -41,8 +41,15 @@ void GameObjectManager::DeleteObject(GameObject * _obj)
 
 void GameObjectManager::Render()
 {
+
+	RECT thisRect = {};
+	m_deviceView->GetWindowRect(&thisRect);
+	SetRect(&thisRect, 0, 0, thisRect.right - thisRect.left, thisRect.bottom - thisRect.top);
+	float ratioX = float(WINCX) / thisRect.right;
+	float ratioY = float(WINCY) / thisRect.bottom;
+
 	for (auto& obj : m_objectList)
 	{
-		obj->Render();
+		obj->Render(ratioX, ratioY);
 	}
 }

@@ -103,7 +103,9 @@
     <ClInclude Include="GameObjectManager.h">
       <Filter>03.Manager</Filter>
     </ClInclude>
-    <ClInclude Include="MFC_Utility.h" />
+    <ClInclude Include="MFC_Utility.h">
+      <Filter>98.PreCompile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -142,7 +144,9 @@
     <ClCompile Include="GameObjectManager.cpp">
       <Filter>03.Manager</Filter>
     </ClCompile>
-    <ClCompile Include="MFC_Utility.cpp" />
+    <ClCompile Include="MFC_Utility.cpp">
+      <Filter>98.PreCompile</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFC_TeamTool.rc">

@@ -17,6 +17,7 @@
 #include "DeviceManager.h"
 #include "GameObjectManager.h"
 #include "GameObject.h"
+#include "MainFormView.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -32,6 +33,7 @@ BEGIN_MESSAGE_MAP(CMFC_TeamToolView, CView)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CMFC_TeamToolView 생성/소멸
@@ -72,7 +74,7 @@ void CMFC_TeamToolView::OnDraw(CDC* /*pDC*/)
 	if (!g_obejctToolMode)
 		GameObjectManager::GetInstance()->Render();
 	else
-		m_creatingObject->Render();
+		m_creatingObject->Render(1,1);
 
 	DeviceManager::GetInstance()->RenderEnd();
 
@@ -149,11 +151,39 @@ void CMFC_TeamToolView::OnInitialUpdate()
 	DeviceManager::GetInstance()->Initialize();
 	TextureManager::GetInstance()->LoadTexture(L"jpg");
 	TextureManager::GetInstance()->LoadTexture(L"png");
-
-
+	GameObjectManager::GetInstance()->SetDeviceView(this);
+	auto frame = (CMainFrame*)(::AfxGetApp()->GetMainWnd());
+	m_formView = (MainFormView*)frame->m_mainSplitter.GetPane(0, 1);
 
 	m_creatingObject = new GameObject;
 	m_creatingObject->data.position = D3DXVECTOR3(WINCX * 0.5f, WINCY * 0.5f, 0);
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 }
 
+
+
+void CMFC_TeamToolView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+
+	
+
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	GameObject* obj = new GameObject;
+
+	obj->data.position.x = point.x;
+	obj->data.position.y = point.y;
+
+	obj->data.angle = m_creatingObject->data.angle;
+	obj->data.texName = m_creatingObject->data.texName;
+	obj->data.name = m_creatingObject->data.name;
+	obj->data.colliderOffset = m_creatingObject->data.colliderOffset;
+	obj->data.colliderScale = m_creatingObject->data.colliderScale;
+
+	GameObjectManager::GetInstance()->AddObject(obj);
+
+	m_formView->AddInstalledObjectData(obj->data);
+
+	Invalidate(false);
+
+	CView::OnLButtonDown(nFlags, point);
+}

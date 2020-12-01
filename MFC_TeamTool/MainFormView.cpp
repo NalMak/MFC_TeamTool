@@ -7,7 +7,6 @@
 
 #include "FileIO.h"
 #include "TextureManager.h"
-#include "MFC_Utility.h"
 #include "MainFrm.h"
 #include "MFC_TeamToolView.h"
 #include "GameObject.h"
@@ -41,6 +40,12 @@ void MainFormView::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT6, m_scaleY);
 	DDX_Control(pDX, IDC_EDIT7, m_scaleZ);
 	DDX_Control(pDX, IDC_COMBO3, m_objectComboBox);
+	DDX_Control(pDX, IDC_EDIT8, m_creatingObjectName);
+	DDX_Control(pDX, IDC_EDIT9, m_colliderOffsetX);
+	DDX_Control(pDX, IDC_EDIT10, m_colliderOffsetY);
+	DDX_Control(pDX, IDC_EDIT11, m_colliderScaleX);
+	DDX_Control(pDX, IDC_EDIT12, m_colliderScaleY);
+	DDX_Control(pDX, IDC_LIST1, m_installedObjectList);
 }
 
 BEGIN_MESSAGE_MAP(MainFormView, CFormView)
@@ -48,6 +53,9 @@ BEGIN_MESSAGE_MAP(MainFormView, CFormView)
 	ON_EN_CHANGE(IDC_EDIT13, &MainFormView::OnEnChangeTextureSearch)
 	ON_CBN_SELCHANGE(IDC_COMBO1, &MainFormView::OnCbnSelchangeTexture)
 	ON_BN_CLICKED(IDC_BUTTON2, &MainFormView::OnBnClickedButtonChangeScene)
+	ON_BN_CLICKED(IDC_BUTTON1, &MainFormView::OnBnClickedCreateObject)
+	ON_EN_CHANGE(IDC_EDIT8, &MainFormView::OnEnChangeSetName)
+	ON_CBN_SELCHANGE(IDC_COMBO3, &MainFormView::OnCbnSelchangeSelectObject)
 END_MESSAGE_MAP()
 
 
@@ -86,14 +94,14 @@ void MainFormView::OnInitialUpdate()
 	InitTransform();
 	
 
-	for (auto texture : TextureManager::GetInstance()->GetTexList())
+	/*for (auto texture : TextureManager::GetInstance()->GetTexList())
 	{
 		ObjectData data;
 		data.texName = texture.first;
 		data.name = texture.first;
 		m_objectDataList.emplace_back(data);
 		m_objectComboBox.AddString(texture.first.c_str());
-	}
+	}*/
 
 
 
@@ -134,17 +142,57 @@ void MainFormView::InitTransform()
 	MFC_Utility::SetEditBoxFloat(&m_positionX, 0);
 	MFC_Utility::SetEditBoxFloat(&m_positionY, 0);
 	MFC_Utility::SetEditBoxFloat(&m_positionZ, 0);
+
 	MFC_Utility::SetEditBoxFloat(&m_angle, 0);
 	MFC_Utility::SetEditBoxFloat(&m_scaleX, 1);
 	MFC_Utility::SetEditBoxFloat(&m_scaleY, 1);
 	MFC_Utility::SetEditBoxFloat(&m_scaleZ, 1);
 
+	MFC_Utility::SetEditBoxFloat(&m_colliderOffsetX, 0);
+	MFC_Utility::SetEditBoxFloat(&m_colliderOffsetY, 0);
+	MFC_Utility::SetEditBoxFloat(&m_colliderScaleX, 1);
+	MFC_Utility::SetEditBoxFloat(&m_colliderScaleY, 1);
 
 }
 
 void MainFormView::InitTexture()
 {
 	OnEnChangeTextureSearch();
+	m_textureComboBox.SetCurSel(0);
+}
+
+void MainFormView::UpdateCreatingObjectInfo()
+{
+	auto obj = m_deviceView->GetCreatingObject();
+
+	m_textureComboBox.ResetContent();
+	CString tok = L"";
+	GetDlgItemText(IDC_EDIT13, tok);
+	if (tok == L"")
+	{
+		for (auto& tex : TextureManager::GetInstance()->GetTexList())
+		{
+			CString target = tex.first.c_str();
+
+			m_textureComboBox.AddString(target);
+		}
+	}
+
+	m_textureComboBox.SelectString(0,obj->data.texName);
+	m_creatingObjectName.SetWindowTextW(obj->data.name);
+	MFC_Utility::SetEditBoxFloat(&m_positionX, 0);
+	MFC_Utility::SetEditBoxFloat(&m_positionY, 0);
+	MFC_Utility::SetEditBoxFloat(&m_positionZ, 0);
+	MFC_Utility::SetEditBoxFloat(&m_angle, obj->data.angle);
+	MFC_Utility::SetEditBoxFloat(&m_scaleX, obj->data.scale.x);
+	MFC_Utility::SetEditBoxFloat(&m_scaleY, obj->data.scale.y);
+	MFC_Utility::SetEditBoxFloat(&m_scaleZ, obj->data.scale.z);
+	MFC_Utility::SetEditBoxFloat(&m_colliderOffsetX, obj->data.colliderOffset.x);
+	MFC_Utility::SetEditBoxFloat(&m_colliderOffsetY, obj->data.colliderOffset.y);
+	MFC_Utility::SetEditBoxFloat(&m_colliderScaleX, obj->data.colliderScale.x);
+	MFC_Utility::SetEditBoxFloat(&m_colliderScaleY, obj->data.colliderScale.y);
+	//m_textureComboBox.set
+	//m_textureComboBox.set
 }
 
 void MainFormView::OnSelChangedTree(NMHDR * pNMHDR, LRESULT * pResult)
@@ -263,3 +311,87 @@ void MainFormView::OnBnClickedButtonChangeScene()
 	m_deviceView->Invalidate(false);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
+
+
+void MainFormView::OnBnClickedCreateObject()
+{
+
+	if (m_deviceView->GetCreatingObject()->data.name == L"")
+	{
+		ERR_MSG(L"이름을 설정해 주세요");
+		return;
+	}
+	for (auto& data : m_objectDataList)
+	{
+		if (data.name == m_deviceView->GetCreatingObject()->data.name)
+		{
+			ERR_MSG(L"이미 동일한 이름의 오브젝트가 존재합니다");
+			return;
+		}
+	}
+
+	CString value;
+	GetDlgItem(IDC_EDIT1)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.position.x = _tstof(value);
+	GetDlgItem(IDC_EDIT2)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.position.y = _tstof(value);
+	GetDlgItem(IDC_EDIT3)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.position.z = _tstof(value);
+	GetDlgItem(IDC_EDIT4)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.angle = _tstof(value);
+	GetDlgItem(IDC_EDIT5)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.scale.x = _tstof(value);
+	GetDlgItem(IDC_EDIT6)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.scale.y = _tstof(value);
+	GetDlgItem(IDC_EDIT7)->GetWindowTextW(value);
+	m_deviceView->GetCreatingObject()->data.scale.z = _tstof(value);
+
+	m_deviceView->Invalidate(false);
+
+	m_objectDataList.emplace_back(m_deviceView->GetCreatingObject()->data);
+	m_objectComboBox.AddString(m_deviceView->GetCreatingObject()->data.name);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void MainFormView::OnEnChangeSetName()
+{
+	CString	name;
+	m_creatingObjectName.GetWindowTextW(name);
+	m_deviceView->GetCreatingObject()->data.name = name;
+
+}
+
+
+void MainFormView::OnCbnSelchangeSelectObject()
+{
+	ObjectData newData;
+	for (auto& data : m_objectDataList)
+	{
+		CString currentName = L"";
+		m_objectComboBox.GetLBText(m_objectComboBox.GetCurSel(), currentName);
+		if (data.name == currentName)
+		{
+			newData = data;
+			break;
+		}
+		
+		if (data.name ==  m_objectDataList.back().name)
+			return;
+	}
+
+
+	m_deviceView->GetCreatingObject()->data = newData;
+	UpdateCreatingObjectInfo();
+
+	m_deviceView->Invalidate(false);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+void MainFormView::AddInstalledObjectData(ObjectData _data)
+{
+	m_installedObjectList.AddString(_data.name);
+}
+
+
+
